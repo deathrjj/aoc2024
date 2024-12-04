@@ -36,94 +36,144 @@ func checkRight(data [][]string, row, col int) int {
 	if col+3 >= len(data[row]) {
 		return 0
 	}
-	if data[row][col] == "X" && data[row][col+1] == "M" && data[row][col+2] == "A" && data[row][col+3] == "S" {
-		return 1
+	if data[row][col+1] != "M" {
+		return 0
 	}
-	return 0
+	if data[row][col+2] != "A" {
+		return 0
+	}
+	if data[row][col+3] != "S" {
+		return 0
+	}
+	return 1
 }
 
 func checkRightDown(data [][]string, row, col int) int {
 	if row+3 >= len(data) || col+3 >= len(data[row]) {
 		return 0
 	}
-	if data[row][col] == "X" && data[row+1][col+1] == "M" && data[row+2][col+2] == "A" && data[row+3][col+3] == "S" {
-		return 1
+	if data[row+1][col+1] != "M" {
+		return 0
 	}
-	return 0
+	if data[row+2][col+2] != "A" {
+		return 0
+	}
+	if data[row+3][col+3] != "S" {
+		return 0
+	}
+	return 1
 }
 
 func checkDown(data [][]string, row, col int) int {
 	if row+3 >= len(data) {
 		return 0
 	}
-	if data[row][col] == "X" && data[row+1][col] == "M" && data[row+2][col] == "A" && data[row+3][col] == "S" {
-		return 1
+	if data[row+1][col] != "M" {
+		return 0
 	}
-	return 0
+	if data[row+2][col] != "A" {
+		return 0
+	}
+	if data[row+3][col] != "S" {
+		return 0
+	}
+	return 1
 }
 
 func checkLeftDown(data [][]string, row, col int) int {
 	if row+3 >= len(data) || col-3 < 0 {
 		return 0
 	}
-	if data[row][col] == "X" && data[row+1][col-1] == "M" && data[row+2][col-2] == "A" && data[row+3][col-3] == "S" {
-		return 1
+	if data[row+1][col-1] != "M" {
+		return 0
 	}
-	return 0
+	if data[row+2][col-2] != "A" {
+		return 0
+	}
+	if data[row+3][col-3] != "S" {
+		return 0
+	}
+	return 1
 }
 
 func checkLeft(data [][]string, row, col int) int {
 	if col-3 < 0 {
 		return 0
 	}
-	if data[row][col] == "X" && data[row][col-1] == "M" && data[row][col-2] == "A" && data[row][col-3] == "S" {
-		return 1
+	if data[row][col-1] != "M" {
+		return 0
 	}
-	return 0
+	if data[row][col-2] != "A" {
+		return 0
+	}
+	if data[row][col-3] != "S" {
+		return 0
+	}
+	return 1
 }
 
 func checkLeftUp(data [][]string, row, col int) int {
 	if row-3 < 0 || col-3 < 0 {
 		return 0
 	}
-	if data[row][col] == "X" && data[row-1][col-1] == "M" && data[row-2][col-2] == "A" && data[row-3][col-3] == "S" {
-		return 1
+	if data[row-1][col-1] != "M" {
+		return 0
 	}
-	return 0
+	if data[row-2][col-2] != "A" {
+		return 0
+	}
+	if data[row-3][col-3] != "S" {
+		return 0
+	}
+	return 1
 }
 
 func checkUp(data [][]string, row, col int) int {
 	if row-3 < 0 {
 		return 0
 	}
-	if data[row][col] == "X" && data[row-1][col] == "M" && data[row-2][col] == "A" && data[row-3][col] == "S" {
-		return 1
+	if data[row-1][col] != "M" {
+		return 0
 	}
-	return 0
+	if data[row-2][col] != "A" {
+		return 0
+	}
+	if data[row-3][col] != "S" {
+		return 0
+	}
+	return 1
 }
 
 func checkRightUp(data [][]string, row, col int) int {
 	if row-3 < 0 || col+3 >= len(data[row]) {
 		return 0
 	}
-	if data[row][col] == "X" && data[row-1][col+1] == "M" && data[row-2][col+2] == "A" && data[row-3][col+3] == "S" {
-		return 1
+	if data[row-1][col+1] != "M" {
+		return 0
 	}
-	return 0
+	if data[row-2][col+2] != "A" {
+		return 0
+	}
+	if data[row-3][col+3] != "S" {
+		return 0
+	}
+	return 1
 }
 
 func findXMAS(data [][]string) int {
 	total := 0
 	for i, row := range data {
 		for j := range row {
-			total += checkRight(data, i, j)
-			total += checkRightDown(data, i, j)
-			total += checkDown(data, i, j)
-			total += checkLeftDown(data, i, j)
-			total += checkLeft(data, i, j)
-			total += checkLeftUp(data, i, j)
-			total += checkUp(data, i, j)
-			total += checkRightUp(data, i, j)
+			if data[i][j] == "X" {
+				total += checkRight(data, i, j)
+				total += checkRightDown(data, i, j)
+				total += checkDown(data, i, j)
+				total += checkLeftDown(data, i, j)
+				total += checkLeft(data, i, j)
+				total += checkLeftUp(data, i, j)
+				total += checkUp(data, i, j)
+				total += checkRightUp(data, i, j)
+			}
 		}
 	}
 	return total
