@@ -179,87 +179,57 @@ func findXMAS(data [][]string) int {
 	return total
 }
 
-// M.M
-// .A.
-// S.S
-func checkMTop(data [][]string, row, col int) int {
-
-	if data[row+2][col] != "S" {
-		return 0
-	}
-
-	if data[row+2][col+2] != "S" {
-		return 0
-	}
-	return 1
-}
-
-// S.M
-// .A.
-// S.M
-func checkMRight(data [][]string, row, col int) int {
-	if data[row][col] != "S" {
-		return 0
-	}
-	if data[row+2][col] != "S" {
-		return 0
-	}
-	return 1
-}
-
-// S.S
-// .A.
-// M.M
-func checkMBottom(data [][]string, row, col int) int {
-	if data[row][col] != "S" {
-		return 0
-	}
-	if data[row][col+2] != "S" {
-		return 0
-	}
-	return 1
-}
-
-// M.S
-// .A.
-// M.S
-func checkMLeft(data [][]string, row, col int) int {
-	if data[row][col+2] != "S" {
-		return 0
-	}
-	if data[row+2][col+2] != "S" {
-		return 0
-	}
-	return 1
-}
-
 func findXshapedMAS(data [][]string) int {
 	total := 0
 	for i, row := range data {
 		if i+2 >= len(data) {
-			continue
+			break
 		}
 		for j := range row {
 			if j+2 >= len(data[i]) {
-				continue
+				break
 			}
 			if data[i+1][j+1] != "A" {
 				continue
 			}
+			// M Top Left
 			if data[i][j] == "M" {
-				if data[i][j+2] == "M" {
-					total += checkMTop(data, i, j)
+				if data[i+2][j+2] != "S" {
+					continue
 				}
+				// M Top Right
+				if data[i][j+2] == "M" {
+					if data[i+2][j] != "S" {
+						continue
+					}
+					total++
+				}
+				// M Bottom Left
 				if data[i+2][j] == "M" {
-					total += checkMLeft(data, i, j)
+					if data[i][j+2] != "S" {
+						continue
+					}
+					total++
 				}
 			}
+			// M Bottom Right
 			if data[i+2][j+2] == "M" {
-				if data[i+2][j] == "M" {
-					total += checkMBottom(data, i, j)
+				if data[i][j] != "S" {
+					continue
 				}
+				// M Top Right
 				if data[i][j+2] == "M" {
-					total += checkMRight(data, i, j)
+					if data[i+2][j] != "S" {
+						continue
+					}
+					total++
+				}
+				// M Bottom Left
+				if data[i+2][j] == "M" {
+					if data[i][j+2] != "S" {
+						continue
+					}
+					total++
 				}
 			}
 		}
