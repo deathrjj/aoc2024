@@ -6,6 +6,8 @@ import (
 	"log"
 	"math"
 	"os"
+	"strconv"
+	"strings"
 )
 
 // Position represents a 2D grid position
@@ -194,4 +196,200 @@ func StringsToInts(strings []string) ([]int, error) {
 // IsEven returns true if the number is even
 func IsEven(n int) bool {
 	return n%2 == 0
+}
+
+// CountBlocks counts contiguous blocks of non-"." entries in the disk map
+func CountBlocks(diskMap []string) int {
+	blocks := 0
+	inBlock := false
+	for _, v := range diskMap {
+		if v != "." {
+			if !inBlock {
+				blocks++
+				inBlock = true
+			}
+		} else {
+			inBlock = false
+		}
+	}
+	return blocks
+}
+
+// CountGaps counts contiguous runs of "." in the disk map
+func CountGaps(diskMap []string) int {
+	gaps := 0
+	inGap := false
+	for _, v := range diskMap {
+		if v == "." {
+			if !inGap {
+				gaps++
+				inGap = true
+			}
+		} else {
+			inGap = false
+		}
+	}
+	return gaps
+}
+
+// IsFreeSpace checks if diskMap[start..end] is entirely "."
+func IsFreeSpace(diskMap []string, start, end int) bool {
+	if start < 0 || end >= len(diskMap) {
+		return false
+	}
+	for i := start; i <= end; i++ {
+		if diskMap[i] != "." {
+			return false
+		}
+	}
+	return true
+}
+
+// CollectBlocks identifies all contiguous file-block segments and returns them as start, end, size
+func CollectBlocks(diskMap []string) [][]int {
+	var blocks [][]int
+	blockStart := -1
+	for i := 0; i < len(diskMap); i++ {
+		if diskMap[i] != "." {
+			if blockStart == -1 {
+				blockStart = i
+			}
+		} else if blockStart != -1 {
+			blocks = append(blocks, []int{blockStart, i - 1, i - blockStart})
+			blockStart = -1
+		}
+	}
+	if blockStart != -1 {
+		blocks = append(blocks, []int{blockStart, len(diskMap) - 1, len(diskMap) - blockStart})
+	}
+	return blocks
+}
+
+// CanFit checks if a block of a given size can fit starting at a given position
+func CanFit(start, size int, diskMap []string) bool {
+	if start+size > len(diskMap) {
+		return false
+	}
+	for i := start; i < start+size; i++ {
+		if diskMap[i] != "." {
+			return false
+		}
+	}
+	return true
+}
+
+// InitLogger initializes the logger and returns a file pointer
+func InitLogger(filePath string) (*os.File, error) {
+	// If the file exists, remove it
+	if _, err := os.Stat(filePath); err == nil {
+		if err := os.Remove(filePath); err != nil {
+			return nil, err
+		}
+	}
+
+	// Create/open a new file for logging
+	logFile, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644) // #nosec G304
+	if err != nil {
+		return nil, err
+	}
+
+	log.SetOutput(logFile)
+	return logFile, nil
+}
+
+// ParseDiskMap parses the input string into a disk map representation
+func ParseDiskMap(input string) []string {
+	var diskMap []string
+	length := len(input)
+
+	// Iterate through the input in pairs
+	for i := 0; i < length; i += 2 {
+		fileSize := int(input[i] - '0') // Convert char to int
+		freeSpace := 0
+
+		// Handle odd-length input (last digit as free space if no pair)
+		if i+1 < length {
+			freeSpace = int(input[i+1] - '0')
+		}
+
+		// Add file blocks
+		for j := 0; j < fileSize; j++ {
+			diskMap = append(diskMap, fmt.Sprintf("%d", i/2))
+		}
+
+		// Add free space
+		for j := 0; j < freeSpace; j++ {
+			diskMap = append(diskMap, ".")
+		}
+	}
+
+	return diskMap
+}
+
+// FileBlock represents a contiguous file block in the disk map
+type FileBlock struct {
+	FileID int
+	Start  int
+	End    int
+}
+
+// IdentifyFiles returns a slice of FileBlocks representing contiguous file segments
+func IdentifyFiles(diskMap []string) []FileBlock {
+	var files []FileBlock
+	inFile := false
+	currentFileID := -1
+	currentStart := -1
+
+	for i, v := range diskMap {
+		if v == "." {
+			// If we were in a file, close it off
+			if inFile {
+				files = append(files, FileBlock{
+					FileID: currentFileID,
+					Start:  currentStart,
+					End:    i - 1,
+				})
+				inFile = false
+			}
+		} else {
+			// We have a file block
+			fid, err := strconv.Atoi(v)
+			if err != nil {
+				log.Fatalf("Invalid file ID '%s' in disk map: %v", v, err)
+			}
+			if !inFile {
+				inFile = true
+				currentFileID = fid
+				currentStart = i
+			} else if fid != currentFileID {
+				// Encountered a new file unexpectedly
+				files = append(files, FileBlock{
+					FileID: currentFileID,
+					Start:  currentStart,
+					End:    i - 1,
+				})
+				currentFileID = fid
+				currentStart = i
+			}
+		}
+	}
+	// Close off last file if we ended in one
+	if inFile {
+		files = append(files, FileBlock{
+			FileID: currentFileID,
+			Start:  currentStart,
+			End:    len(diskMap) - 1,
+		})
+	}
+
+	return files
+}
+
+// ReadInputAsString reads a file and returns its contents as a trimmed string
+func ReadInputAsString(filename string) (string, error) {
+	file, err := os.ReadFile(filename)
+	if err != nil {
+		return "", fmt.Errorf("error reading file: %v", err)
+	}
+	return strings.TrimSpace(string(file)), nil
 }
