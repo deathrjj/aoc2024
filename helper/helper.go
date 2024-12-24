@@ -18,8 +18,8 @@ type Position struct {
 // Grid represents a 2D grid of strings
 type Grid [][]string
 
-// ReadInput reads a file and returns its contents as a Grid
-func ReadInput(filename string) Grid {
+// ReadInputToGrid reads a file and returns its contents as a Grid
+func ReadInputToGrid(filename string) Grid {
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
@@ -35,6 +35,36 @@ func ReadInput(filename string) Grid {
 			chars = append(chars, string(c))
 		}
 		data = append(data, chars)
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	return data
+}
+
+func ReadInputToInt2DArray(filename string) [][]int {
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	var data [][]int
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		var nums []int
+		for _, c := range line {
+			// Convert rune to string then to int
+			num, err := strconv.Atoi(string(c))
+			if err != nil {
+				log.Fatal(err)
+			}
+			nums = append(nums, num)
+		}
+		data = append(data, nums)
 	}
 
 	if err := scanner.Err(); err != nil {

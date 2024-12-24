@@ -8,7 +8,7 @@ import (
 
 func main() {
 	// Read and parse input
-	grid := helper.ReadInput("day08/input.txt")
+	grid := helper.ReadInputToGrid("day08/input.txt")
 
 	// Part 1: Find antinodes based on distance ratios
 	antinodeCount := antenna.FindAntinodes(grid)
